@@ -15,7 +15,7 @@ const headerStyles = {
   },
  
 }
-class ControlHeader extends React.Component {
+class ControlHeader extends React.PureComponent {
   render() {
     const { classes } = this.props;
     const title=this.props.title;

@@ -1,26 +1,38 @@
-import React, {Fragment} from 'react';
-import {withStyles} from '@material-ui/core/styles';
+import React, { Fragment } from 'react';
+import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import Input from '@material-ui/core/Input';
 import Divider from '@material-ui/core/Divider';
 
 
 const styles = {
- subject: {
-   width: '90%',
-   margin: '10px',
- }
+  input: {
+    width: '100%',
+    padding: '1em 1.5em',
+    borderStyle: 'none',
+    '&:focus': {
+      outline: 'none',
+    }
+  },
 };
-class Subject extends React.Component {
+
+class Subject extends React.PureComponent {
+  onSubjectChange = (e) => {
+    this.props.subjectChange(e.target.value);
+  }
+
   render() {
-    const { classes } = this.props;
-    const subject=this.props.subject;
+    const { classes, subject } = this.props;
 
     return (
-      <Fragment>
-      <Input className={classes.subject}  disableUnderline={true}  placeholder="Subject:" margin="normal" value={subject}/>
-      <Divider />
-    </Fragment>
+      <div>
+        <input className={classes.input}
+          placeholder="Subject:"
+          type="text"
+          value={subject}
+          onChange={this.onSubjectChange}
+        />
+        <Divider />
+      </div>
     );
   }
 }

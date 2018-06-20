@@ -1,73 +1,133 @@
 import React, { Fragment } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import { Editor, EditorState, RichUtils } from 'draft-js';
+import Divider from '@material-ui/core/Divider';
+
+
 import BoldIcon from '@material-ui/icons/FormatBold';
 import ItalicIcon from '@material-ui/icons/FormatItalic';
 import UnderlineIcon from '@material-ui/icons/FormatUnderlined';
 
 import Button from '@material-ui/core/Button';
 
+import { Editor } from 'slate-react';
+import { Value } from 'slate';
 
-const styles =
-{
-  editor: {
-    margin: '20px',
-    height: '300px',
-    width: '95%',
+function BoldMark(props) {
+  return <strong>{props.children}</strong>
+}
+function CodeNode(props) {
+  return (
+    <pre {...props.attributes}>
+      <code>{props.children}</code>
+    </pre>
+  )
+}
+
+const initialValue = Value.fromJSON({
+  document: {
+    nodes: [
+      {
+        object: 'block',
+        type: 'paragraph',
+        nodes: [
+          {
+            object: 'text',
+            leaves: [
+              {
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ],
   },
-  inlineStyle: {
-    display: 'flex',
-    justifyContent: 'flex-start',
-    width: '90%',
-  }
-};
+})
+
 
 class Body extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { editorState: EditorState.createEmpty() };
-    this.onChange = (editorState) => this.setState({ editorState });
+    this.state = { value: initialValue };
   }
 
-  onBoldClick = () => {
-    this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, 'BOLD'));
+  onChange = ({ value }) => {
+    console.log(value);
+    this.setState({ value })
   }
-  onItalicClick = () => {
-    this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, 'ITALIC'));
-  }
-  onUnderlineClick = () => {
-    this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, 'UNDERLINE'));
+
+  onKeyDown = (event, change) => {
+
+    if (event.key !== '&') {
+      return;
+    }
+    event.preventDefault();
+
+    change.toggleMark('bold');
+    return true;
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, bodyText } = this.props;
+
     return (
-      <Fragment>
-        <div className={classes.editor}>
-          <Editor
-            editorState={this.state.editorState}
-            handleKeyCommand={this.handleKeyCommand}
-            onChange={this.onChange}
-          />
+      <div className={classes.body}>
+        <Editor className={classes.editor}
+          value={this.state.value}
+          onChange={this.onChange}
+          renderNode={this.renderNode}
+          onKeyDown={this.onKeyDown}
+          renderMark={this.renderMark}
+        />
+        <Divider />
+        <div className={classes.fontControlls}>
+          <Button onClick={this.boldClick}>
+            <BoldIcon />
+          </Button>
+          <Button onClick={this.props.italicClick}>
+            <ItalicIcon />
+          </Button>
+          <Button onClick={this.props.underlineClick}>
+            <UnderlineIcon />
+          </Button>
+        </div>
+        <Divider />
 
-        </div>
-        <div className={classes.inlineStyle}>
-        <Button onClick={this.onBoldClick}>
-          <BoldIcon />
-        </Button>
-        <Button onClick={this.onItalicClick}>
-          <ItalicIcon />
-        </Button>
-        <Button onClick={this.onUnderlineClick}>
-          <UnderlineIcon />
-        </Button>
-        </div>
-      </Fragment>
+
+      </div>
     );
-
   }
+
+  renderMark = props => {
+    switch (props.mark.type) {
+      case 'bold':
+        return <BoldMark {...props} />
+    }
+  }
+
+  renderNode = props => {
+    switch (props.node.type) {
+      case 'code':
+        return <CodeNode {...props} />
+    }
+  }
+
+
+
 }
+
+const styles= {
+  body: {
+    display: 'flex',
+    flexDirection: 'column',
+    flexGrow: 1, 
+  },
+  editor: {
+    flexGrow: '1',
+    padding: '2em',
+  },
+};
 
 Body.propTypes = {
   classes: PropTypes.object.isRequired,

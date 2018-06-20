@@ -3,9 +3,9 @@ import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 
-
 import Header from './Header';
-import Recepients from './Recepients';
+import Recepients from './Recepients2';
+import Footer from './Footer';
 import Subject from './Subject';
 import Body from './Body';
 
@@ -26,28 +26,35 @@ MailContainer
 
 
 const styles = {
-  root: {
-    display: 'flex',
-    flexDirection: 'column',
+  row: {
+    flexFlow: 'column nowrap',
+    height: '100%',
+    width: '100%',
   },
-  body: {
-    flexGroth: 10,
-  }
 };
 
-class MailContainer extends React.Component {
+class MailContainer extends React.PureComponent {
   
   render() {
     const {classes} = this.props;
-    const {title, recepients, subject, body} = this.props.data;
+    const {title, recepients, subject, body} = this.props;
 
     return (
-      <div className={classes.root}>
+      <div className={classes.row}>
         <Header  title={title}/> 
-        <Recepients  recepients={recepients}/>
-        <Subject subject={subject}/>
-        <Body className={classes.body} body={body} />
-        <ControlFooter />
+        <Recepients 
+          class={classes.rowItem} 
+          recepients={recepients}
+          toRecepientChange={this.props.toRecepientChange}
+          ccClick={this.props.ccClick}
+          ccRecepientChange={this.props.ccRecepientChange}
+          bccClick={this.props.bccClick}
+          bccRecepientChange={this.props.bccRecepientChange}
+          />
+
+        <Subject subject={subject} subjectChange={this.props.subjectChange}/>
+        <Body body={body} />
+        <Footer />
       </div>
     );
   }
@@ -58,12 +65,3 @@ MailContainer.propTypes = {
 
 export default withStyles(styles)(MailContainer);
 
-
-class ControlFooter extends React.Component {
-  render(){
-    return(
-      <div className="footer">
-      </div>
-    );
-  }
-}
