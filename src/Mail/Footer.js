@@ -1,6 +1,4 @@
 import React from 'react';
-import BottomNavigation from '@material-ui/core/BottomNavigation';
-import Toolbar from '@material-ui/core/Toolbar';
 import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
@@ -13,7 +11,11 @@ const headerStyles = {
     justifyContent: 'flex-start',
     flexflow: 'row wrap',
     background: '#f2f2f2',
+    marginTop: '1em',
   },
+  tools:{
+    padding: '0.5em'
+  }
  
 }
 class Footer extends React.Component {
@@ -21,11 +23,12 @@ class Footer extends React.Component {
     const { classes } = this.props;
 
     return (
-        <BottomNavigation className={classes.toolbar} position="static">
-          <Toolbar >
-            <Button size='small' variant='outlined' >SEND</Button>
-          </Toolbar>
-        </BottomNavigation>
+      <div className={classes.toolbar}>
+        <div className={classes.tools}>
+            <Button size='small' variant='outlined' onClick={this.props.onSend} >SEND</Button>
+        </div>
+      </div>
+
     );
   }
 }

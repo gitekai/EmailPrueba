@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import {Base64} from 'js-base64';
 import Header from './Mail/Header';
@@ -6,6 +6,9 @@ import Recepients from './Mail/Recepients2';
 import Footer from './Mail/Footer';
 import Subject from './Mail/Subject';
 import Body from './Mail/Body';
+import { Value } from 'slate';
+import Html from 'slate-html-serializer';
+
 
 const styles = {
   column: {
@@ -43,17 +46,28 @@ function updateSigninStatus(isSignedIn) {
    // sendEmail(); called if the libraries lo
   }else{
     console.log("not logged in");
+    window.gapi.auth2.getAuthInstance().signIn();
   }
 }
 
-function sendEmail(maildata){
+function send(maildata){
   const toRecepient =`To:${maildata.toRecepient}`;
   const subject = `Subject:${maildata.subject}`;
+
   const contentType = 'Content-Type:text/html; charset="UTF-8"'; 
   const transferEncoding= 'Content-Transfer-Encoding: quoted-printable';
-  const header = [toRecepient,subject,contentType,transferEncoding].join(`\r\f`);
-  const rawMessage = `${header}\n\n${this.state.body}`;
+  const contentArray = [toRecepient,subject,contentType,transferEncoding]; 
+  if( maildata.cc ){
+    contentArray.push(`Cc:${maildata.cc}`);
+  }
+  if(maildata.bcc){
+    contentArray.push(`Bcc:${maildata.bcc}`);
+  }
 
+  const header = contentArray.join(`\r\f`);
+  const rawMessage = `${header}\n\n${maildata.messageBody}`;
+
+  console.log("sending Message");
   const rawB64=Base64.encodeURI(rawMessage);
   const request = window.gapi.client.gmail.users.messages.send({
     'userId': 'me',
@@ -63,6 +77,146 @@ function sendEmail(maildata){
   });
   request.execute();
 }
+
+// body methods
+const initialValue = Value.fromJSON({
+  document: {
+    nodes: [
+      {
+        object: 'block',
+        type: 'paragraph',
+        nodes: [
+          {
+            object: 'text',
+            leaves: [
+              {
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+});
+
+const BLOCK_TAGS = {
+  p: 'paragraph',
+  blockquote: 'quote',
+  ol: 'numbered-list',
+  li: 'list-item',
+  h1: 'heading-one',
+  h3: 'heading-three',
+  pre: 'code',
+  ul: 'list'
+}
+
+const MARK_TAGS = {
+  em: 'italic',
+  strong: 'bold',
+  u: 'underlined',
+  del: 'strikethrough'
+}
+
+const rules = [
+  {
+    deserialize(el, next) {
+      const type = BLOCK_TAGS[el.tagName.toLowerCase()]
+      if (type) {
+        return {
+          object: 'block',
+          type: type,
+          data: {
+            className: el.getAttribute('class'),
+          },
+          nodes: next(el.childNodes),
+        }
+      }
+    },
+    serialize(obj, children) {
+      if (obj.object === 'block') {
+        switch (obj.type) {
+          case 'code':
+            return (
+              <pre>
+                <code>{children}</code>
+              </pre>
+            )
+          case 'paragraph':
+            return <p className={obj.data.get('className')}>{children}</p>
+          case 'quote':
+            return <blockquote>{children}</blockquote>
+          case 'heading-one':
+            return <h1>{children}</h1>
+          case 'heading-three': 
+            return <h3>{children}</h3>
+          case 'bulleted-list': 
+            return <ul>{children}</ul>
+          case 'numbered-list':
+            return <ol>{children}</ol>
+            case 'list-item':
+            return <li>{children}</li>
+
+          default: 
+            return
+        }
+      }
+    },
+  },
+  // Add a new rule that handles marks...
+  {
+    deserialize(el, next) {
+      const type = MARK_TAGS[el.tagName.toLowerCase()]
+      if (type) {
+        return {
+          object: 'mark',
+          type: type,
+          nodes: next(el.childNodes),
+        }
+      }
+    },
+    serialize(obj, children) {
+      if (obj.object === 'mark') {
+        switch (obj.type) {
+          case 'bold':
+            return <strong>{children}</strong>
+          case 'italic':
+            return <em>{children}</em>
+          case 'underlined':
+            return <u>{children}</u>
+            case 'strikethrough':
+            return <del>{children}</del>
+          default: 
+            return
+        }
+      }
+    },
+  },
+];
+
+
+const html = new Html({ rules });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class Gmail extends React.Component {
@@ -75,7 +229,7 @@ constructor(props){
     ccRecepient: undefined,
     bccRecepient: undefined ,
     mailTitle: 'New Mail',
-    body: '',
+    body: initialValue,
   };
 }
 
@@ -117,6 +271,20 @@ constructor(props){
   bodyTextChange = (body) => {
     this.setState({body});  
   }
+
+  clickBodyFontHandler = () => {
+    this.state.body.change().toggleMark('bold');
+  }
+
+  sendEmail = () => {
+    send({
+      toRecepient: this.state.toRecepient,
+      cc: this.state.ccRecepient,
+      bcc:this.state.bccRecepient,
+      subject: this.state.subject,
+      messageBody: html.serialize(this.state.body),
+    })
+  }
  
  render(){
     const classes = this.props.classes;
@@ -135,10 +303,9 @@ constructor(props){
           recepientChange={this.recepientChange}
           addBCCRecepientClick={this.addBCCRecepientClick}
           addCCRecepientClick={this.addCCRecepientClick}
-
         />
-        <Body className={classes.body}/>
-        <Footer />
+        <Body className={classes.body} clickHandler={this.clickBodyFontHandler} onTextChange={this.bodyTextChange} value={this.state.body} />
+        <Footer onSend={this.sendEmail}/>
       </div>
     );
   }

@@ -1,7 +1,6 @@
 import React from 'react';
 // ControlHeader 
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
+
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 
@@ -9,9 +8,10 @@ import PropTypes from 'prop-types';
 
 const headerStyles = {
   toolbar: {
+    padding: '1.5em',
+    background: 'grey',
     display: 'flex',
     alignItems: 'center',
-    flexDirection: 'row',
   },
  
 }
@@ -21,16 +21,16 @@ class ControlHeader extends React.PureComponent {
     const title=this.props.title;
 
     return (
-        <AppBar position="static">
-          <Toolbar className={classes.toolbar}>
-            <div >{title}</div>
-          </Toolbar>
-        </AppBar>
+        <div className={classes.toolbar}>
+            <div >
+              {title}
+            </div>
+        </div>
     );
   }
 }
 
-AppBar.propTypes = {
+ControlHeader.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 export default withStyles(headerStyles)(ControlHeader);
