@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 const headerStyles = {
   toolbar: {
     display: 'flex',
+    flexShrink: 0,
     justifyContent: 'flex-start',
     flexflow: 'row wrap',
     background: '#f2f2f2',

@@ -8,25 +8,13 @@ const styles = {
   recepient: {
     display: 'flex',
     flexFlow: 'column nowrap',
-  },
-
-  toRecepientRow: {
-    //referente a column 
-    flexBasis: '30%',
-    //referent a row 
-    display: 'flex',
-    flexFlow: 'row nowrap',
+    flexShrink: 0
   },
   toRecepientInput: {
     display: 'flex',
-    marginRigth: '1%',
+    paddingRigth: '1%',
     flex: '1 0 auto',
   },
-  ButtonElement: {
-  },
-  extraRecepients: {
-    flexBasis: '30%',
-  }
 };
 class Recepients2 extends React.PureComponent {
   render() {

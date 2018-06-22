@@ -131,27 +131,26 @@ class Body extends React.Component {
   }
 
   renderMarkButton = (type, icon) => {
-    // const isActive = this.hasMark(type)
     const onClick = event => this.onClickMark(event, type)
     return (
-      <Button size='small' onClick={onClick} >
+      <Button size='small' onClick={onClick} className={this.props.classes[this.hasMark(type) ? 'marked' : 'notMarked']}>
         {icon}
       </Button>
     )
   }
 
   renderBlockButton = (type, icon) => {
-    // let isActive = this.hasBlock(type)
-    /*
+    let isActive = this.hasBlock(type)
+    
     if (['numbered-list', 'bulleted-list'].includes(type)) {
       const { value } = this.props;
       const parent = value.document.getParent(value.blocks.first().key)
       isActive = this.hasBlock('list-item') && parent && parent.type === type
-    }*/
+    }
     const onClick = event => this.onClickBlock(event, type);
     return (
       // eslint-disable-next-line react/jsx-no-bind
-      <Button size='small' onClick={onClick}>
+      <Button size='small' onClick={onClick} className={this.props.classes[(isActive) ? 'marked' : 'notMarked']}>
        {icon}
       </Button>
     )
@@ -226,7 +225,11 @@ const styles = {
   editor: {
     flexGrow: '1',
     padding: '2em',
+    overflow: 'auto',
   },
+  marked: {
+    background: 'lightblue',
+  }
 };
 
 Body.propTypes = {
